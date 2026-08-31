@@ -669,8 +669,133 @@ def ppo_update_epoch(
         "total_loss": float(sum(total_losses) / len(total_losses)),
     }
 
-# Step 23 - train_ppo (not yet solved)
-# TODO: implement
+# Step 23 - train_ppo
+def train_ppo(
+    actor,
+    critic,
+    optimizer,
+    envs,
+    n_iters,
+    n_steps,
+    n_epochs,
+    minibatch_size=64,
+    gamma=0.99,
+    lam=0.95,
+    clip_eps=0.2,
+    value_coef=0.5,
+    entropy_coef=0.01,
+    max_grad_norm=0.5,
+    mass_range=None,
+    length_range=None,
+    gravity_range=None,
+    seed=0,
+):
+    """Train PPO for n_iters collect-update cycles with optional domain randomization.
+
+    Args:
+        actor: Gaussian policy network.
+        critic: Value network.
+        optimizer: Optimizer over actor and critic parameters.
+        envs: List of Gymnasium environments.
+        n_iters: Number of collect-update iterations.
+        n_steps: Rollout horizon per iteration.
+        n_epochs: PPO epochs per iteration.
+        minibatch_size: Minibatch size for PPO updates.
+        gamma: Discount factor.
+        lam: GAE lambda.
+        clip_eps: PPO clip range.
+        value_coef: Value loss coefficient.
+        entropy_coef: Entropy bonus coefficient.
+        max_grad_norm: Gradient clip norm.
+        mass_range: Optional (min, max) mass for domain randomization.
+        length_range: Optional (min, max) length for domain randomization.
+        gravity_range: Optional (min, max) gravity for domain randomization.
+        seed: Random seed.
+
+    Returns:
+        Dict with 'returns_history': list of mean rollout rewards per iteration.
+        Actor and critic are updated in place.
+    """
+    import numpy as np
+    import torch
+
+    returns_history = []
+    rng = np.random.default_rng(seed)
+
+    # Domain randomization is enabled only when all three ranges are supplied.
+    randomize = (
+        mass_range is not None
+        and length_range is not None
+        and gravity_range is not None
+    )
+
+    for _ in range(n_iters):
+        # Sample and apply fresh physics to every environment before
+        # collecting this iteration's rollout.
+        if randomize:
+            for env in envs:
+                config = sample_physics_config(
+                    mass_range,
+                    length_range,
+                    gravity_range,
+                    rng,
+                )
+                set_pendulum_mass(env, config["mass"])
+                set_pendulum_length(env, config["length"])
+                set_pendulum_gravity(env, config["gravity"])
+
+        rollout = collect_rollout(
+            envs,
+            actor,
+            critic,
+            n_steps=n_steps,
+        )
+
+        # Compute the value estimate for the state following the final step.
+        with torch.no_grad():
+            last_values = critic(rollout["last_obs"]).squeeze(-1)
+
+        advantages, returns = compute_gae(
+            rollout["rewards"],
+            rollout["values"],
+            rollout["dones"],
+            last_values,
+            rollout["last_dones"],
+            gamma=gamma,
+            lam=lam,
+        )
+
+        # ppo_update_epoch expects the rollout observation key to be
+        # 'observations', while collect_rollout stores it as 'obs'.
+        update_rollout = {
+            "observations": rollout["obs"],
+            "actions": rollout["actions"],
+            "log_probs": rollout["log_probs"],
+        }
+
+        for _ in range(n_epochs):
+            ppo_update_epoch(
+                actor,
+                critic,
+                optimizer,
+                update_rollout,
+                advantages,
+                returns,
+                clip_eps=clip_eps,
+                value_coef=value_coef,
+                entropy_coef=entropy_coef,
+                max_grad_norm=max_grad_norm,
+                minibatch_size=minibatch_size,
+            )
+
+        # Mean shaped reward over the rollout.
+        returns_history.append(
+            float(rollout["rewards"].mean().item())
+        )
+
+    return {
+        "returns_history": returns_history,
+    }
 
 # Step 24 - resample_envs_physics (not yet solved)
 # TODO: implement
