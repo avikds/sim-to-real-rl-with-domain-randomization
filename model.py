@@ -369,8 +369,17 @@ def rollout_rewards(rollout):
     """
     return rollout["rewards"]
 
-# Step 14 - rollout_dones (not yet solved)
-# TODO: implement
+# Step 14 - rollout_dones
+def rollout_dones(rollout):
+    """Extract the recorded episode-termination flags from a collected rollout.
+
+    Args:
+        rollout: dict produced by collect_rollout.
+
+    Returns:
+        torch.Tensor of shape (n_steps, n_envs) under key 'dones'.
+    """
+    return rollout["dones"]
 
 # Step 15 - rollout_values (not yet solved)
 # TODO: implement

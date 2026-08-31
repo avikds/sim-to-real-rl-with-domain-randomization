@@ -23,7 +23,7 @@ python scaffold.py
 - [x] **11.** rollout_observations
 - [x] **12.** rollout_actions
 - [x] **13.** rollout_rewards
-- [ ] **14.** rollout_dones
+- [x] **14.** rollout_dones
 - [ ] **15.** rollout_values
 - [ ] **16.** rollout_log_probs
 - [ ] **17.** compute_gae
