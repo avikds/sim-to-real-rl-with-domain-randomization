@@ -29,7 +29,7 @@ python scaffold.py
 - [x] **17.** compute_gae
 - [x] **18.** normalize_advantages
 - [x] **19.** clipped_surrogate_objective
-- [ ] **20.** value_loss_and_entropy_bonus
+- [x] **20.** value_loss_and_entropy_bonus
 - [ ] **21.** ppo_loss
 - [ ] **22.** ppo_update_epoch
 - [ ] **23.** train_ppo

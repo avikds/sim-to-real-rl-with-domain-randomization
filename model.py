@@ -490,8 +490,33 @@ def clipped_surrogate_objective(
 
     return -torch.mean(torch.minimum(unclipped, clipped))
 
-# Step 20 - value_loss_and_entropy_bonus (not yet solved)
-# TODO: implement
+# Step 20 - value_loss_and_entropy_bonus
+def value_loss_and_entropy_bonus(
+    values_pred,
+    value_targets,
+    entropy,
+    value_coef=0.5,
+    entropy_coef=0.01,
+):
+    """Compute value-function loss and entropy bonus for PPO.
+
+    Args:
+        values_pred: Predicted state values, shape (batch,).
+        value_targets: Target returns, shape (batch,).
+        entropy: Per-sample entropy (batch,) or a scalar mean.
+        value_coef: Scale on the MSE value loss (default 0.5).
+        entropy_coef: Scale on mean entropy (default 0.01).
+
+    Returns:
+        (value_loss, entropy_bonus) as scalar torch.Tensors.
+    """
+    value_loss = value_coef * torch.mean(
+        (values_pred - value_targets) ** 2
+    )
+
+    entropy_bonus = entropy_coef * torch.mean(entropy)
+
+    return value_loss, entropy_bonus
 
 # Step 21 - ppo_loss (not yet solved)
 # TODO: implement
