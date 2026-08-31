@@ -45,11 +45,11 @@ python scaffold.py
 sample_physics_config: (1.055, 0.908, 8.164)
 n_parallel_envs: 4
 action_shape: (1, 1) log_prob_dim: 1
-rollout_obs: (64, 4, 3) rewards_mean: -6.6327
-adv_mean: 0.0 returns_std: 33.8639
-ppo_epoch_loss: 4538.2341
-eval_nominal_return: -983.729
-generalization_gap: {'in_dist_return': -1068.043, 'heldout_return': -976.129, 'gap': -91.914}
-mass_sweep: [(0.7, -1085.778), (1.0, -1069.87), (1.5, -1066.533)]
-dr_vs_fixed: {'dr_mean': -1130.897, 'fixed_mean': -1090.371, 'dr_advantage': -40.525}
+rollout_obs: (64, 4, 3) rewards_mean: -7.1919
+adv_mean: -0.0 returns_std: 38.6135
+ppo_epoch_loss: 5150.7899
+eval_nominal_return: -951.419
+generalization_gap: {'in_dist_return': -888.626, 'heldout_return': -908.947, 'gap': 20.321}
+mass_sweep: [(0.7, -953.783), (1.0, -876.906), (1.5, -858.538)]
+dr_vs_fixed: {'dr_mean': -960.792, 'fixed_mean': -932.389, 'dr_advantage': -28.403}
 ```
