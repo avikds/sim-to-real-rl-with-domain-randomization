@@ -901,8 +901,84 @@ def evaluate_fixed_physics(
 
     return float(np.mean(episode_returns))
 
-# Step 26 - measure_generalization_gap (not yet solved)
-# TODO: implement
+# Step 26 - measure_generalization_gap
+def measure_generalization_gap(
+    actor,
+    train_ranges,
+    heldout_ranges,
+    n_configs=5,
+    n_episodes=3,
+    seed=0,
+):
+    """Measure in-dist vs held-out returns and the generalization gap.
+
+    Args:
+        actor: Trained actor network (Gaussian policy).
+        train_ranges: Dict with keys 'mass', 'length', 'gravity' -> (min, max).
+        heldout_ranges: Same structure as train_ranges, held-out box.
+        n_configs: Number of physics configs to sample per side.
+        n_episodes: Episodes per config for evaluate_fixed_physics.
+        seed: Seed for config sampling and evaluation.
+
+    Returns:
+        Dict with float keys 'in_dist_return', 'heldout_return', 'gap'
+        where gap = in_dist_return - heldout_return.
+    """
+    import numpy as np
+
+    rng = np.random.default_rng(seed)
+
+    def sample_configs(ranges):
+        configs = []
+
+        for _ in range(n_configs):
+            config = sample_physics_config(
+                ranges["mass"],
+                ranges["length"],
+                ranges["gravity"],
+                rng,
+            )
+            configs.append(config)
+
+        return configs
+
+    train_configs = sample_configs(train_ranges)
+    heldout_configs = sample_configs(heldout_ranges)
+
+    train_returns = []
+    heldout_returns = []
+
+    for config in train_configs:
+        result = evaluate_fixed_physics(
+            actor,
+            config["mass"],
+            config["length"],
+            config["gravity"],
+            n_episodes=n_episodes,
+            seed=seed,
+        )
+        train_returns.append(float(result))
+
+    for config in heldout_configs:
+        result = evaluate_fixed_physics(
+            actor,
+            config["mass"],
+            config["length"],
+            config["gravity"],
+            n_episodes=n_episodes,
+            seed=seed,
+        )
+        heldout_returns.append(float(result))
+
+    in_dist_return = float(np.mean(train_returns))
+    heldout_return = float(np.mean(heldout_returns))
+    gap = float(in_dist_return - heldout_return)
+
+    return {
+        "in_dist_return": in_dist_return,
+        "heldout_return": heldout_return,
+        "gap": gap,
+    }
 
 # Step 27 - sweep_physics_parameter (not yet solved)
 # TODO: implement
