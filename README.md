@@ -37,7 +37,7 @@ python scaffold.py
 - [x] **25.** evaluate_fixed_physics
 - [x] **26.** measure_generalization_gap
 - [x] **27.** sweep_physics_parameter
-- [ ] **28.** compare_dr_vs_fixed_policy
+- [x] **28.** compare_dr_vs_fixed_policy
 
 ---
 
