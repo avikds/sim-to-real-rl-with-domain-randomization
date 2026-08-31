@@ -393,8 +393,17 @@ def rollout_values(rollout):
     """
     return rollout["values"]
 
-# Step 16 - rollout_log_probs (not yet solved)
-# TODO: implement
+# Step 16 - rollout_log_probs
+def rollout_log_probs(rollout):
+    """Extract the recorded action log-probabilities from a collected rollout.
+
+    Args:
+        rollout: dict returned by collect_rollout.
+
+    Returns:
+        torch.Tensor of shape (n_steps, n_envs) under key 'log_probs'.
+    """
+    return rollout["log_probs"]
 
 # Step 17 - compute_gae (not yet solved)
 # TODO: implement
