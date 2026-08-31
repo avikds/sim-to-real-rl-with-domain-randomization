@@ -180,8 +180,19 @@ def build_actor_network(obs_dim, action_dim, hidden_dim=64):
 
     return ActorNetwork()
 
-# Step 8 - build_critic_network (not yet solved)
-# TODO: implement
+# Step 8 - build_critic_network
+def build_critic_network(obs_dim, hidden_dim=64):
+    """Build a critic network mapping observations to scalar state values."""
+
+    import torch.nn as nn
+
+    return nn.Sequential(
+        nn.Linear(obs_dim, hidden_dim),
+        nn.Tanh(),
+        nn.Linear(hidden_dim, hidden_dim),
+        nn.Tanh(),
+        nn.Linear(hidden_dim, 1),
+    )
 
 # Step 9 - sample_action_log_prob_entropy (not yet solved)
 # TODO: implement
