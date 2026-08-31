@@ -830,8 +830,76 @@ def resample_envs_physics(envs, mass_range, length_range, gravity_range, rng):
 
     return configs
 
-# Step 25 - evaluate_fixed_physics (not yet solved)
-# TODO: implement
+# Step 25 - evaluate_fixed_physics
+def evaluate_fixed_physics(
+    actor,
+    mass,
+    length,
+    gravity,
+    n_episodes=5,
+    seed=0,
+    max_steps=200,
+):
+    """Measure mean episodic return on one fixed Pendulum physics config.
+
+    Args:
+        actor: Trained actor network (Gaussian policy).
+        mass: Pendulum mass to evaluate under.
+        length: Rod length to evaluate under.
+        gravity: Gravity to evaluate under.
+        n_episodes: Number of evaluation episodes.
+        seed: Base seed; episode i uses seed + i.
+        max_steps: Max steps per episode before stopping.
+
+    Returns:
+        Mean episodic return as a Python float.
+    """
+    import gymnasium as gym
+    import numpy as np
+    import torch
+
+    env = gym.make("Pendulum-v1")
+
+    set_pendulum_mass(env, mass)
+    set_pendulum_length(env, length)
+    set_pendulum_gravity(env, gravity)
+
+    episode_returns = []
+
+    actor.eval()
+
+    with torch.no_grad():
+        for i in range(n_episodes):
+            obs, _ = env.reset(seed=seed + i)
+            episode_return = 0.0
+
+            for _ in range(max_steps):
+                obs_tensor = torch.as_tensor(
+                    obs,
+                    dtype=torch.float32,
+                ).reshape(1, -1)
+
+                actions, _, _ = sample_action_log_prob_entropy(
+                    actor,
+                    obs_tensor,
+                    deterministic=True,
+                )
+
+                # Support both batched and scalar action outputs.
+                action = np.asarray(actions.detach().cpu().numpy()).reshape(-1)
+
+                obs, reward, terminated, truncated, _ = env.step(action)
+
+                episode_return += float(reward)
+
+                if terminated or truncated:
+                    break
+
+            episode_returns.append(episode_return)
+
+    env.close()
+
+    return float(np.mean(episode_returns))
 
 # Step 26 - measure_generalization_gap (not yet solved)
 # TODO: implement
