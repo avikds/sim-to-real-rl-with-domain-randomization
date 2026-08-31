@@ -797,8 +797,38 @@ def train_ppo(
         "returns_history": returns_history,
     }
 
-# Step 24 - resample_envs_physics (not yet solved)
-# TODO: implement
+# Step 24 - resample_envs_physics
+def resample_envs_physics(envs, mass_range, length_range, gravity_range, rng):
+    """Resample physics for every env and return the applied configs.
+
+    Args:
+        envs: List of Gymnasium Pendulum-v1 environments.
+        mass_range: (min, max) float tuple for pendulum mass.
+        length_range: (min, max) float tuple for rod length.
+        gravity_range: (min, max) float tuple for gravity.
+        rng: numpy.random.Generator used for all sampling.
+
+    Returns:
+        List of dicts with keys 'mass', 'length', 'gravity', one per env,
+        in the same order as `envs`.
+    """
+    configs = []
+
+    for env in envs:
+        config = sample_physics_config(
+            mass_range,
+            length_range,
+            gravity_range,
+            rng,
+        )
+
+        set_pendulum_mass(env, config["mass"])
+        set_pendulum_length(env, config["length"])
+        set_pendulum_gravity(env, config["gravity"])
+
+        configs.append(config)
+
+    return configs
 
 # Step 25 - evaluate_fixed_physics (not yet solved)
 # TODO: implement

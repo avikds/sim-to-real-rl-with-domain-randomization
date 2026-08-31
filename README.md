@@ -33,7 +33,7 @@ python scaffold.py
 - [x] **21.** ppo_loss
 - [x] **22.** ppo_update_epoch
 - [x] **23.** train_ppo
-- [ ] **24.** resample_envs_physics
+- [x] **24.** resample_envs_physics
 - [ ] **25.** evaluate_fixed_physics
 - [ ] **26.** measure_generalization_gap
 - [ ] **27.** sweep_physics_parameter
