@@ -345,8 +345,17 @@ def rollout_observations(rollout):
     """
     return rollout["obs"]
 
-# Step 12 - rollout_actions (not yet solved)
-# TODO: implement
+# Step 12 - rollout_actions
+def rollout_actions(rollout):
+    """Extract the recorded actions tensor from a collected rollout.
+
+    Args:
+        rollout: dict produced by collect_rollout.
+
+    Returns:
+        torch.Tensor of shape (n_steps, n_envs, action_dim).
+    """
+    return rollout["actions"]
 
 # Step 13 - rollout_rewards (not yet solved)
 # TODO: implement

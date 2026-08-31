@@ -21,7 +21,7 @@ python scaffold.py
 - [x] **9.** sample_action_log_prob_entropy
 - [x] **10.** collect_rollout
 - [x] **11.** rollout_observations
-- [ ] **12.** rollout_actions
+- [x] **12.** rollout_actions
 - [ ] **13.** rollout_rewards
 - [ ] **14.** rollout_dones
 - [ ] **15.** rollout_values
