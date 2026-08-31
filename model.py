@@ -381,8 +381,17 @@ def rollout_dones(rollout):
     """
     return rollout["dones"]
 
-# Step 15 - rollout_values (not yet solved)
-# TODO: implement
+# Step 15 - rollout_values
+def rollout_values(rollout):
+    """Extract the recorded critic value estimates from a collected rollout.
+
+    Args:
+        rollout: dict produced by collect_rollout, containing a 'values' tensor.
+
+    Returns:
+        torch.Tensor of shape (n_steps, n_envs) with critic value estimates.
+    """
+    return rollout["values"]
 
 # Step 16 - rollout_log_probs (not yet solved)
 # TODO: implement
