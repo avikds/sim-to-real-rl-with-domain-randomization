@@ -221,8 +221,117 @@ def sample_action_log_prob_entropy(actor, obs, deterministic=False):
 
     return actions, log_probs, entropy
 
-# Step 10 - collect_rollout (not yet solved)
-# TODO: implement
+# Step 10 - collect_rollout
+def collect_rollout(envs, actor, critic, n_steps, device="cpu"):
+    """Collect a fixed-length rollout from parallel envs into a trajectory dict.
+
+    Args:
+        envs: list of Gymnasium environments (already constructed).
+        actor: nn.Module policy used with sample_action_log_prob_entropy.
+        critic: nn.Module mapping observations to value estimates.
+        n_steps: number of parallel steps to collect.
+        device: torch device string for stored tensors.
+
+    Returns:
+        Dict of torch tensors with keys obs, actions, rewards, dones, values,
+        log_probs (each leading dims (n_steps, n_envs, ...)), plus last_obs
+        and last_dones for bootstrapping.
+    """
+    import numpy as np
+    import torch
+
+    n_envs = len(envs)
+
+    if n_envs == 0:
+        raise ValueError("envs must contain at least one environment.")
+
+    # Reset every environment and collect initial observations.
+    obs_list = []
+    for env in envs:
+        obs, _ = env.reset()
+        obs_list.append(obs)
+
+    obs = np.asarray(obs_list, dtype=np.float32)
+
+    obs_buffer = []
+    actions_buffer = []
+    rewards_buffer = []
+    dones_buffer = []
+    values_buffer = []
+    log_probs_buffer = []
+
+    for _ in range(n_steps):
+        obs_tensor = torch.as_tensor(
+            obs, dtype=torch.float32, device=device
+        )
+
+        with torch.no_grad():
+            actions_tensor, log_probs_tensor, _ = (
+                sample_action_log_prob_entropy(actor, obs_tensor)
+            )
+            values_tensor = critic(obs_tensor).squeeze(-1)
+
+        actions = actions_tensor.cpu().numpy()
+
+        next_obs_list = []
+        rewards = []
+        dones = []
+
+        for i, env in enumerate(envs):
+            next_obs, reward, terminated, truncated, _ = env.step(actions[i])
+
+            done = bool(terminated or truncated)
+
+            shaped_reward = shape_upright_hold_reward(
+                next_obs,
+                reward,
+                actions[i],
+            )
+
+            rewards.append(float(shaped_reward))
+            dones.append(float(done))
+
+            if done:
+                next_obs, _ = env.reset()
+
+            next_obs_list.append(next_obs)
+
+        obs_buffer.append(obs_tensor.detach())
+        actions_buffer.append(actions_tensor.detach())
+        rewards_buffer.append(
+            torch.as_tensor(
+                rewards,
+                dtype=torch.float32,
+                device=device,
+            )
+        )
+        # IMPORTANT: Deep-ML expects float32 dones, not bool.
+        dones_buffer.append(
+            torch.as_tensor(
+                dones,
+                dtype=torch.float32,
+                device=device,
+            )
+        )
+        values_buffer.append(values_tensor.detach())
+        log_probs_buffer.append(log_probs_tensor.detach())
+
+        obs = np.asarray(next_obs_list, dtype=np.float32)
+
+    return {
+        "obs": torch.stack(obs_buffer, dim=0),
+        "actions": torch.stack(actions_buffer, dim=0),
+        "rewards": torch.stack(rewards_buffer, dim=0),
+        "dones": torch.stack(dones_buffer, dim=0),
+        "values": torch.stack(values_buffer, dim=0),
+        "log_probs": torch.stack(log_probs_buffer, dim=0),
+        "last_obs": torch.as_tensor(
+            obs, dtype=torch.float32, device=device
+        ),
+        "last_dones": torch.as_tensor(
+            dones, dtype=torch.float32, device=device
+        ),
+    }
 
 # Step 11 - rollout_observations (not yet solved)
 # TODO: implement
