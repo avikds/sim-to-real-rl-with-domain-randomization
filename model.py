@@ -20,8 +20,12 @@ def set_pendulum_mass(env, mass):
     env.unwrapped.m = mass
     return env
 
-# Step 2 - set_pendulum_length (not yet solved)
-# TODO: implement
+# Step 2 - set_pendulum_length
+def set_pendulum_length(env, length):
+    """Set a Pendulum env's rod length physics parameter and return env."""
+
+    env.unwrapped.l = length
+    return env
 
 # Step 3 - set_pendulum_gravity (not yet solved)
 # TODO: implement
