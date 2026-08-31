@@ -980,8 +980,69 @@ def measure_generalization_gap(
         "gap": gap,
     }
 
-# Step 27 - sweep_physics_parameter (not yet solved)
-# TODO: implement
+# Step 27 - sweep_physics_parameter
+def sweep_physics_parameter(
+    actor,
+    param_name,
+    param_values,
+    base_mass=1.0,
+    base_length=1.0,
+    base_gravity=10.0,
+    n_episodes=3,
+    seed=0,
+):
+    """Sweep one physics parameter and report mean return at each value.
+
+    Args:
+        actor: Trained actor network (Gaussian policy).
+        param_name: One of 'mass', 'length', or 'gravity'.
+        param_values: Sequence of floats to assign to the chosen parameter.
+        base_mass: Mass used when not sweeping mass.
+        base_length: Length used when not sweeping length.
+        base_gravity: Gravity used when not sweeping gravity.
+        n_episodes: Number of evaluation episodes per configuration.
+        seed: Base seed forwarded to each evaluation.
+
+    Returns:
+        List of dicts [{'param_value': float, 'mean_return': float}, ...]
+        in the same order as param_values.
+    """
+    if param_name not in ("mass", "length", "gravity"):
+        raise ValueError(
+            "param_name must be one of 'mass', 'length', or 'gravity'."
+        )
+
+    results = []
+
+    for value in param_values:
+        mass = base_mass
+        length = base_length
+        gravity = base_gravity
+
+        if param_name == "mass":
+            mass = value
+        elif param_name == "length":
+            length = value
+        else:
+            gravity = value
+
+        mean_return = evaluate_fixed_physics(
+            actor,
+            mass,
+            length,
+            gravity,
+            n_episodes=n_episodes,
+            seed=seed,
+        )
+
+        results.append(
+            {
+                "param_value": float(value),
+                "mean_return": float(mean_return),
+            }
+        )
+
+    return results
 
 # Step 28 - compare_dr_vs_fixed_policy (not yet solved)
 # TODO: implement
