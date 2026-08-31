@@ -333,8 +333,17 @@ def collect_rollout(envs, actor, critic, n_steps, device="cpu"):
         ),
     }
 
-# Step 11 - rollout_observations (not yet solved)
-# TODO: implement
+# Step 11 - rollout_observations
+def rollout_observations(rollout):
+    """Extract the recorded observations tensor from a collected rollout.
+
+    Args:
+        rollout: dict produced by collect_rollout.
+
+    Returns:
+        torch.Tensor of shape (n_steps, n_envs, obs_dim) stored under key 'obs'.
+    """
+    return rollout["obs"]
 
 # Step 12 - rollout_actions (not yet solved)
 # TODO: implement

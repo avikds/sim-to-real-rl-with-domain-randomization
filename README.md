@@ -20,7 +20,7 @@ python scaffold.py
 - [x] **8.** build_critic_network
 - [x] **9.** sample_action_log_prob_entropy
 - [x] **10.** collect_rollout
-- [ ] **11.** rollout_observations
+- [x] **11.** rollout_observations
 - [ ] **12.** rollout_actions
 - [ ] **13.** rollout_rewards
 - [ ] **14.** rollout_dones
