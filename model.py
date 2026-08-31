@@ -143,8 +143,42 @@ def shape_upright_hold_reward(
 
     return shaped_reward
 
-# Step 7 - build_actor_network (not yet solved)
-# TODO: implement
+# Step 7 - build_actor_network
+def build_actor_network(obs_dim, action_dim, hidden_dim=64):
+    """Build a Gaussian actor: forward(obs) -> (mean, std).
+
+    Store the learnable log-std as an attribute named `log_std`
+    (an nn.Parameter of shape (action_dim,), initialized to zeros) --
+    later steps read it via `actor.log_std`.
+    """
+    import torch
+    import torch.nn as nn
+
+    class ActorNetwork(nn.Module):
+        def __init__(self):
+            super().__init__()
+
+            self.network = nn.Sequential(
+                nn.Linear(obs_dim, hidden_dim),
+                nn.Tanh(),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.Tanh(),
+            )
+
+            self.mean_head = nn.Linear(hidden_dim, action_dim)
+
+            self.log_std = nn.Parameter(
+                torch.zeros(action_dim)
+            )
+
+        def forward(self, obs):
+            x = self.network(obs)
+            mean = self.mean_head(x)
+            std = torch.exp(self.log_std)
+
+            return mean, std
+
+    return ActorNetwork()
 
 # Step 8 - build_critic_network (not yet solved)
 # TODO: implement
