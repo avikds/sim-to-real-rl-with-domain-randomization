@@ -461,8 +461,14 @@ def compute_gae(
 
     return advantages, returns
 
-# Step 18 - normalize_advantages (not yet solved)
-# TODO: implement
+# Step 18 - normalize_advantages
+def normalize_advantages(advantages, eps=1e-8):
+    """Normalize advantages to zero mean and unit standard deviation."""
+
+    mean = advantages.mean()
+    std = advantages.std()
+
+    return (advantages - mean) / (std + eps)
 
 # Step 19 - clipped_surrogate_objective (not yet solved)
 # TODO: implement
