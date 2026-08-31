@@ -26,7 +26,7 @@ python scaffold.py
 - [x] **14.** rollout_dones
 - [x] **15.** rollout_values
 - [x] **16.** rollout_log_probs
-- [ ] **17.** compute_gae
+- [x] **17.** compute_gae
 - [ ] **18.** normalize_advantages
 - [ ] **19.** clipped_surrogate_objective
 - [ ] **20.** value_loss_and_entropy_bonus

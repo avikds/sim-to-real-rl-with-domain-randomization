@@ -405,8 +405,61 @@ def rollout_log_probs(rollout):
     """
     return rollout["log_probs"]
 
-# Step 17 - compute_gae (not yet solved)
-# TODO: implement
+# Step 17 - compute_gae
+def compute_gae(
+    rewards,
+    values,
+    dones,
+    last_values,
+    last_dones,
+    gamma=0.99,
+    lam=0.95,
+):
+    """Compute GAE advantages and value targets from a rollout.
+
+    Args:
+        rewards: Tensor (T, N) of per-step rewards.
+        values: Tensor (T, N) of critic values V(s_t).
+        dones: Tensor (T, N) of episode-termination flags.
+        last_values: Tensor (N,) bootstrap values after the final step.
+        last_dones: Tensor (N,) done flags after the final step.
+        gamma: Discount factor (default 0.99).
+        lam: GAE lambda (default 0.95).
+
+    Returns:
+        advantages: Tensor (T, N).
+        returns: Tensor (T, N), equal to advantages + values.
+    """
+    import torch
+
+    T = rewards.shape[0]
+    advantages = torch.zeros_like(rewards)
+
+    gae = torch.zeros_like(last_values)
+
+    for t in reversed(range(T)):
+        if t == T - 1:
+            next_values = last_values
+            next_dones = last_dones
+        else:
+            next_values = values[t + 1]
+            next_dones = dones[t + 1]
+
+        # Do not bootstrap across episode boundaries.
+        nonterminal = 1.0 - next_dones
+
+        delta = (
+            rewards[t]
+            + gamma * next_values * nonterminal
+            - values[t]
+        )
+
+        gae = delta + gamma * lam * nonterminal * gae
+        advantages[t] = gae
+
+    returns = advantages + values
+
+    return advantages, returns
 
 # Step 18 - normalize_advantages (not yet solved)
 # TODO: implement
