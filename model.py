@@ -470,8 +470,25 @@ def normalize_advantages(advantages, eps=1e-8):
 
     return (advantages - mean) / (std + eps)
 
-# Step 19 - clipped_surrogate_objective (not yet solved)
-# TODO: implement
+# Step 19 - clipped_surrogate_objective
+def clipped_surrogate_objective(
+    new_log_probs,
+    old_log_probs,
+    advantages,
+    clip_eps=0.2,
+):
+    """Compute the PPO clipped surrogate policy objective from log-probs and advantages."""
+
+    ratio = torch.exp(new_log_probs - old_log_probs)
+
+    unclipped = ratio * advantages
+    clipped = torch.clamp(
+        ratio,
+        1.0 - clip_eps,
+        1.0 + clip_eps,
+    ) * advantages
+
+    return -torch.mean(torch.minimum(unclipped, clipped))
 
 # Step 20 - value_loss_and_entropy_bonus (not yet solved)
 # TODO: implement
