@@ -357,8 +357,17 @@ def rollout_actions(rollout):
     """
     return rollout["actions"]
 
-# Step 13 - rollout_rewards (not yet solved)
-# TODO: implement
+# Step 13 - rollout_rewards
+def rollout_rewards(rollout):
+    """Extract the recorded rewards tensor from a collected rollout.
+
+    Args:
+        rollout: dict returned by collect_rollout.
+
+    Returns:
+        torch.Tensor of shape (n_steps, n_envs) under key 'rewards'.
+    """
+    return rollout["rewards"]
 
 # Step 14 - rollout_dones (not yet solved)
 # TODO: implement

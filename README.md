@@ -22,7 +22,7 @@ python scaffold.py
 - [x] **10.** collect_rollout
 - [x] **11.** rollout_observations
 - [x] **12.** rollout_actions
-- [ ] **13.** rollout_rewards
+- [x] **13.** rollout_rewards
 - [ ] **14.** rollout_dones
 - [ ] **15.** rollout_values
 - [ ] **16.** rollout_log_probs
