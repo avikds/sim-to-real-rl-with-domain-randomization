@@ -518,8 +518,19 @@ def value_loss_and_entropy_bonus(
 
     return value_loss, entropy_bonus
 
-# Step 21 - ppo_loss (not yet solved)
-# TODO: implement
+# Step 21 - ppo_loss
+def ppo_loss(policy_loss, value_loss, entropy_bonus):
+    """Combine clipped surrogate, value loss, and entropy bonus into one PPO loss.
+
+    Args:
+        policy_loss: Scalar tensor from the clipped surrogate objective.
+        value_loss: Scalar tensor value-function loss.
+        entropy_bonus: Scalar tensor entropy bonus term.
+
+    Returns:
+        Scalar torch.Tensor total_loss = policy_loss + value_loss - entropy_bonus.
+    """
+    return policy_loss + value_loss - entropy_bonus
 
 # Step 22 - ppo_update_epoch (not yet solved)
 # TODO: implement

@@ -30,7 +30,7 @@ python scaffold.py
 - [x] **18.** normalize_advantages
 - [x] **19.** clipped_surrogate_objective
 - [x] **20.** value_loss_and_entropy_bonus
-- [ ] **21.** ppo_loss
+- [x] **21.** ppo_loss
 - [ ] **22.** ppo_update_epoch
 - [ ] **23.** train_ppo
 - [ ] **24.** resample_envs_physics
