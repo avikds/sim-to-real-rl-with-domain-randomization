@@ -532,8 +532,142 @@ def ppo_loss(policy_loss, value_loss, entropy_bonus):
     """
     return policy_loss + value_loss - entropy_bonus
 
-# Step 22 - ppo_update_epoch (not yet solved)
-# TODO: implement
+# Step 22 - ppo_update_epoch
+def ppo_update_epoch(
+    actor,
+    critic,
+    optimizer,
+    rollout,
+    advantages,
+    returns,
+    clip_eps=0.2,
+    value_coef=0.5,
+    entropy_coef=0.01,
+    max_grad_norm=0.5,
+    minibatch_size=64,
+):
+    """Run one PPO update epoch over shuffled minibatches with gradient clipping.
+
+    Args:
+        actor: Gaussian policy module (forward -> means, has log_std param).
+        critic: Value module (forward -> state values).
+        optimizer: Optimizer over actor and critic parameters.
+        rollout: Dict with 'observations', 'actions', 'log_probs'.
+        advantages: Tensor (T, N) or (T*N,).
+        returns: Tensor (T, N) or (T*N,), value targets.
+        clip_eps: PPO clip range (default 0.2).
+        value_coef: Value loss coefficient (default 0.5).
+        entropy_coef: Entropy bonus coefficient (default 0.01).
+        max_grad_norm: Gradient clip norm (default 0.5).
+        minibatch_size: Minibatch size (default 64).
+
+    Returns:
+        Dict of mean floats: policy_loss, value_loss, entropy, total_loss.
+    """
+    import torch
+
+    # Flatten rollout tensors from (T, N, ...) to (T*N, ...).
+    observations = rollout["observations"]
+    actions = rollout["actions"]
+    old_log_probs = rollout["log_probs"]
+
+    observations = observations.reshape(-1, observations.shape[-1])
+    actions = actions.reshape(observations.shape[0], -1)
+    old_log_probs = old_log_probs.reshape(-1)
+
+    advantages = advantages.reshape(-1)
+    returns = returns.reshape(-1)
+
+    # Normalize the full advantage batch before creating minibatches.
+    advantages = normalize_advantages(advantages)
+
+    batch_size = observations.shape[0]
+
+    if not (
+        actions.shape[0]
+        == old_log_probs.shape[0]
+        == advantages.shape[0]
+        == returns.shape[0]
+        == batch_size
+    ):
+        raise ValueError("Rollout and target tensors must have matching batch sizes.")
+
+    if minibatch_size <= 0:
+        raise ValueError("minibatch_size must be positive.")
+
+    # Shuffle the complete batch once for this PPO epoch.
+    indices = torch.randperm(batch_size, device=observations.device)
+
+    policy_losses = []
+    value_losses = []
+    entropies = []
+    total_losses = []
+
+    actor.train()
+    critic.train()
+
+    for start in range(0, batch_size, minibatch_size):
+        mb_idx = indices[start:start + minibatch_size]
+
+        mb_obs = observations[mb_idx]
+        mb_actions = actions[mb_idx]
+        mb_old_log_probs = old_log_probs[mb_idx]
+        mb_advantages = advantages[mb_idx]
+        mb_returns = returns[mb_idx]
+
+        # Actor forward pass: mean is the first output.
+        mean = actor(mb_obs)[0]
+        std = torch.exp(actor.log_std)
+
+        dist = torch.distributions.Normal(mean, std)
+
+        new_log_probs = dist.log_prob(mb_actions).sum(dim=-1)
+        entropy = dist.entropy().sum(dim=-1)
+
+        policy_loss = clipped_surrogate_objective(
+            new_log_probs,
+            mb_old_log_probs,
+            mb_advantages,
+            clip_eps=clip_eps,
+        )
+
+        values_pred = critic(mb_obs).squeeze(-1)
+
+        value_loss, entropy_bonus = value_loss_and_entropy_bonus(
+            values_pred,
+            mb_returns,
+            entropy,
+            value_coef=value_coef,
+            entropy_coef=entropy_coef,
+        )
+
+        total_loss = ppo_loss(
+            policy_loss,
+            value_loss,
+            entropy_bonus,
+        )
+
+        optimizer.zero_grad()
+        total_loss.backward()
+
+        torch.nn.utils.clip_grad_norm_(
+            list(actor.parameters()) + list(critic.parameters()),
+            max_grad_norm,
+        )
+
+        optimizer.step()
+
+        policy_losses.append(policy_loss.detach().item())
+        value_losses.append(value_loss.detach().item())
+        entropies.append(entropy.mean().detach().item())
+        total_losses.append(total_loss.detach().item())
+
+    return {
+        "policy_loss": float(sum(policy_losses) / len(policy_losses)),
+        "value_loss": float(sum(value_losses) / len(value_losses)),
+        "entropy": float(sum(entropies) / len(entropies)),
+        "total_loss": float(sum(total_losses) / len(total_losses)),
+    }
 
 # Step 23 - train_ppo (not yet solved)
 # TODO: implement
