@@ -39,6 +39,17 @@ python scaffold.py
 - [x] **27.** sweep_physics_parameter
 - [x] **28.** compare_dr_vs_fixed_policy
 
----
+## Results
 
-Built on Deep-ML.
+```
+sample_physics_config: (1.055, 0.908, 8.164)
+n_parallel_envs: 4
+action_shape: (1, 1) log_prob_dim: 1
+rollout_obs: (64, 4, 3) rewards_mean: -7.8823
+adv_mean: -0.0 returns_std: 35.2664
+ppo_epoch_loss: 5833.5914
+eval_nominal_return: -986.128
+generalization_gap: {'in_dist_return': -960.988, 'heldout_return': -874.799, 'gap': -86.188}
+mass_sweep: [(0.7, -1016.802), (1.0, -934.9), (1.5, -871.531)]
+dr_vs_fixed: {'dr_mean': -987.315, 'fixed_mean': -1111.099, 'dr_advantage': 123.784}
+```
